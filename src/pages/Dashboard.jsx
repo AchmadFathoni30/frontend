@@ -1,7 +1,16 @@
 import React from 'react';
 import Sidebar from '../components/Sidebar';
+import { ThemeProvider, createTheme } from '@mui/material';
 
 function Dashboard() {
+  const theme = createTheme({
+    typography: {
+      fontFamily: ["Poppins", "sans-serif"].join(","),
+      palette: {
+        red: "#8E0000"
+      },
+    },
+  })
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}

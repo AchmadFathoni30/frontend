@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { styled, useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
@@ -16,69 +16,55 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
+import PeopleIcon from '@mui/icons-material/People';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import LogoutIcon from '@mui/icons-material/Logout';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import { useNavigate } from 'react-router-dom';
 
 const drawerWidth = 240;
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
-  ({ theme }) => ({
+  ({ theme, open }) => ({
     flexGrow: 1,
     padding: theme.spacing(3),
-    transition: theme.transitions.create('margin', {
+    marginLeft: open ? drawerWidth : `-${drawerWidth}px`,
+    transition: theme.transitions.create(['margin'], {
       easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
+      duration: open
+        ? theme.transitions.duration.enteringScreen
+        : theme.transitions.duration.leavingScreen,
     }),
-    marginLeft: `-${drawerWidth}px`,
-    variants: [
-      {
-        props: ({ open }) => open,
-        style: {
-          transition: theme.transitions.create('margin', {
-            easing: theme.transitions.easing.easeOut,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
-          marginLeft: 0,
-        },
-      },
-    ],
-  }),
+  })
 );
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
-})(({ theme }) => ({
-  transition: theme.transitions.create(['margin', 'width'], {
+})(({ theme, open }) => ({
+  transition: theme.transitions.create(['width', 'margin'], {
     easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
+    duration: open
+      ? theme.transitions.duration.enteringScreen
+      : theme.transitions.duration.leavingScreen,
   }),
-  variants: [
-    {
-      props: ({ open }) => open,
-      style: {
-        width: `calc(100% - ${drawerWidth}px)`,
-        marginLeft: `${drawerWidth}px`,
-        transition: theme.transitions.create(['margin', 'width'], {
-          easing: theme.transitions.easing.easeOut,
-          duration: theme.transitions.duration.enteringScreen,
-        }),
-      },
-    },
-  ],
+  ...(open && {
+    marginLeft: drawerWidth,
+    width: `calc(100% - ${drawerWidth}px)`,
+  }),
 }));
 
 const DrawerHeader = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
   ...theme.mixins.toolbar,
   justifyContent: 'flex-end',
 }));
 
-export default function Sidebar({children}) {
+export default function Sidebar({ children }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
+  const navigate = useNavigate();
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -88,9 +74,21 @@ export default function Sidebar({children}) {
     setOpen(false);
   };
 
+  const handleNavigate = (path) => {
+    navigate(path);
+    setOpen(false); // Close the drawer after navigation
+  };
+
+  const handleLogout = () => {
+    // Tambahkan logika logout (contoh: hapus token, clear session, dll.)
+    console.log('User logged out');
+    navigate('/login'); // Redirect ke halaman login
+  };
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
+      {/* AppBar */}
       <AppBar position="fixed" open={open}>
         <Toolbar>
           <IconButton
@@ -98,20 +96,17 @@ export default function Sidebar({children}) {
             aria-label="open drawer"
             onClick={handleDrawerOpen}
             edge="start"
-            sx={[
-              {
-                mr: 2,
-              },
-              open && { display: 'none' },
-            ]}
+            sx={{ mr: 2, ...(open && { display: 'none' }) }}
           >
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            Persistent drawer
+            Dashboard
           </Typography>
         </Toolbar>
       </AppBar>
+
+      {/* Drawer */}
       <Drawer
         sx={{
           width: drawerWidth,
@@ -132,31 +127,51 @@ export default function Sidebar({children}) {
         </DrawerHeader>
         <Divider />
         <List>
-          {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-            <ListItem key={text} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
-          ))}
+          {/* Dashboard */}
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => handleNavigate('/dashboard')}>
+              <ListItemIcon>
+                <DashboardIcon />
+              </ListItemIcon>
+              <ListItemText primary="Dashboard" />
+            </ListItemButton>
+          </ListItem>
+
+          {/* List Users */}
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => handleNavigate('/listusers')}>
+              <ListItemIcon>
+                <PeopleIcon />
+              </ListItemIcon>
+              <ListItemText primary="List Users" />
+            </ListItemButton>
+          </ListItem>
+
+          {/* List Approval */}
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => handleNavigate('/listapproval')}>
+              <ListItemIcon>
+                <AssignmentIcon />
+              </ListItemIcon>
+              <ListItemText primary="List Approval" />
+            </ListItemButton>
+          </ListItem>
         </List>
         <Divider />
         <List>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItem key={text} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
-          ))}
+          {/* Logout */}
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleLogout}>
+              <ListItemIcon>
+                <LogoutIcon />
+              </ListItemIcon>
+              <ListItemText primary="Logout" />
+            </ListItemButton>
+          </ListItem>
         </List>
       </Drawer>
+
+      {/* Main Content */}
       <Main open={open}>
         <DrawerHeader />
         {children}
